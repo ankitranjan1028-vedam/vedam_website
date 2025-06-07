@@ -1,4 +1,5 @@
 import React from "react";
+
 import {
   Box,
   Table,
@@ -108,6 +109,35 @@ const SingleCountText = ({ count, text, isHref }) => {
 };
 
 export const FeeStructure = () => {
+  // Create a simplified table structure that matches the design
+  const createTableRows = () => {
+    const data = homeScreenData.FeeStructure.leftSideYearTable.filter(row => row.id !== "8");
+    
+    // Group data by year
+    const yearGroups = {
+      "Year 1": [],
+      "Year 2": [],
+      "Year 3": [],
+      "Year 4": []
+    };
+    
+    data.forEach(row => {
+      if (row.year1) {
+        yearGroups[row.year1].push(row);
+      } else {
+        // Find the last year that has data and add this row to it
+        const lastYear = Object.keys(yearGroups).reverse().find(year => yearGroups[year].length > 0);
+        if (lastYear) {
+          yearGroups[lastYear].push(row);
+        }
+      }
+    });
+    
+    return yearGroups;
+  };
+
+  const yearGroups = createTableRows();
+
   return (
     <Box
       sx={{
@@ -182,7 +212,7 @@ export const FeeStructure = () => {
               sx={{
                 minWidth: "100%",
                 borderRadius: "12px",
-                border: "1px solid red",
+                border: "2px solid red",
                 padding: "10px",
                 borderCollapse: "separate",
                 borderSpacing: 0,
@@ -199,18 +229,37 @@ export const FeeStructure = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {homeScreenData.FeeStructure.leftSideYearTable
-                  .filter(row => row.id !== "8")
-                  .map((row, idx, filteredArray) => {
-                    const isLastRow = idx === filteredArray.length - 1;
+                {Object.entries(yearGroups).map(([year, rows], yearIndex) => 
+                  rows.map((row, rowIndex) => {
+                    const isLastRow = year === "Year 4" && rowIndex === rows.length - 1;
+                    const isFirstRowOfYear = rowIndex === 0;
+                    const isVeryFirstYear = year === "Year 1";
+                    const isVeryLastYear = year === "Year 4";
+                    
                     return (
                       <TableRow key={row.id}>
-                        <SingleTableCell
-                          isFirst={true}
-                          text={row.year1}
-                          isFirstColumn
-                          isLastRow={isLastRow}
-                        />
+                        {isFirstRowOfYear && (
+                          <TableCell
+                            align="center"
+                            rowSpan={rows.length}
+                            sx={{
+                              whiteSpace: "nowrap",
+                              border: "1px solid rgba(186, 107, 255, 0.3)",
+                              paddingY: "16px",
+                              fontWeight: "400",
+                              color: "rgba(30, 30, 30, 1)",
+                              verticalAlign: "middle",
+                              // Only rounded corners at the very top and very bottom of the entire Year column
+                              // borderTopLeftRadius: isVeryFirstYear ? "12px" : "0px",
+                              borderBottomLeftRadius: isVeryLastYear ? "12px" : "0px",
+                              // Ensure straight borders between year cells
+                              borderTopRightRadius: "0px",
+                              borderBottomRightRadius: "0px",
+                            }}
+                          >
+                            {year}
+                          </TableCell>
+                        )}
                         <SingleTableCell
                           isFirst={true}
                           text={row.semester}
@@ -232,7 +281,8 @@ export const FeeStructure = () => {
                         />
                       </TableRow>
                     );
-                  })}
+                  })
+                )}
               </TableBody>
             </Table>
           </Box>
@@ -302,7 +352,7 @@ export const FeeStructure = () => {
               marginTop: "20px",
             }}
           >
-            {homeScreenData.FeeStructure.rightSideText.map((item) => (
+            {homeScreenData.FeeStructure.rightSideText && homeScreenData.FeeStructure.rightSideText.map((item) => (
               <SingleCountText
                 key={item.id}
                 count={item.id}
@@ -314,30 +364,21 @@ export const FeeStructure = () => {
         </Box>
 
         {/* Hostel Fees Section */}
-
-
         <Box sx={{ width: "100%" }}>
           {/* Desktop Hostel Table */}
-
-          <Box sx={{ padding: "10px", border: "1px solid red", borderRadius: "12px" }}
-
-          >
+          <Box sx={{ padding: "10px", border: "2px solid red",borderRadius: "12px"}}>
             <Box sx={{
               display: { xs: "none", md: "block" },
               borderRadius: "12px",
               overflow: "hidden",
               border: "1px solid rgba(186, 107, 255, 0.3)",
             }}>
-
               <Table
                 sx={{
                   width: "100%",
                   backgroundColor: "rgba(186, 107, 255, 0.08)",
                   borderCollapse: "separate",
                   borderSpacing: 0,
-                  //  border: "1px solid red",
-                  // padding: "10px",
-                  // // overflow:"hidden",
                   borderRadius: "12px"
                 }}
               >
@@ -407,9 +448,8 @@ export const FeeStructure = () => {
             </Box>
           </Box>
 
-
           {/* Mobile Hostel Table */}
-          <Box
+          {/* <Box
             sx={{
               display: { xs: "block", md: "none" },
               borderRadius: "12px",
@@ -481,19 +521,13 @@ export const FeeStructure = () => {
                 </TableRow>
               </TableBody>
             </Table>
-          </Box>
-
-
-
+          </Box> */}
 
           {/* Hostel Fee Notes */}
-
-
           <Box sx={{
             width: "100%",
             display: "flex",
             flexDirection: "column",
-            // gap: "1rem",
             backgroundColor: "rgba(186, 107, 255, 0.08)",
             borderRadius: "12px",
             padding: "1rem",
